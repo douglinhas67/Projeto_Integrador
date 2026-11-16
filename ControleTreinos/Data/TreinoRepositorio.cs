@@ -39,7 +39,7 @@ public class TreinoRepositorio
 
         return banco.Treinos
             .AsNoTracking()
-            .OrderBy(treino => treino.Id)
+            .OrderBy(t => t.Id)
             .ToList();
     }
 
@@ -49,8 +49,8 @@ public class TreinoRepositorio
 
         return banco.Treinos
             .AsNoTracking()
-            .Where(treino => treino.UsuarioId == usuarioId)
-            .OrderBy(treino => treino.Id)
+            .Where(t => t.UsuarioId == usuarioId)
+            .OrderBy(t => t.Id)
             .ToList();
     }
 
@@ -60,7 +60,7 @@ public class TreinoRepositorio
 
         return banco.Treinos
             .AsNoTracking()
-            .FirstOrDefault(treino => treino.Id == treinoId);
+            .FirstOrDefault(t => t.Id == treinoId);
     }
 
     public bool Atualizar(
@@ -72,7 +72,7 @@ public class TreinoRepositorio
         using AppDbContext banco = new AppDbContext();
 
         Treino? treino = banco.Treinos.FirstOrDefault(
-            treino => treino.Id == treinoId
+            t => t.Id == treinoId
         );
 
         if (treino == null)
@@ -82,6 +82,25 @@ public class TreinoRepositorio
 
         treino.AtualizarDados(modalidade, data, duracaoMinutos);
 
+        banco.SaveChanges();
+
+        return true;
+    }
+
+    public bool Excluir(int treinoId)
+    {
+        using AppDbContext banco = new AppDbContext();
+
+        Treino? treino = banco.Treinos.FirstOrDefault(
+            t => t.Id == treinoId
+        );
+
+        if (treino == null)
+        {
+            return false;
+        }
+
+        banco.Treinos.Remove(treino);
         banco.SaveChanges();
 
         return true;

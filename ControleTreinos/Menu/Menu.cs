@@ -66,10 +66,11 @@ public class MenuPrincipal
                         break;
 
                     case "7":
+                        ExcluirTreino();
+                        break;
+
                     case "8":
-                        Console.WriteLine(
-                            "Esta funcionalidade será implementada nas próximas etapas."
-                        );
+                        ConsultarResumoPorUsuario();
                         break;
 
                     default:
@@ -297,6 +298,98 @@ public class MenuPrincipal
         }
 
         Console.WriteLine("Treino atualizado com sucesso!");
+    }
+
+    private void ExcluirTreino()
+    {
+        Console.WriteLine("=== EXCLUIR TREINO ===");
+        Console.Write("Identificador do treino: ");
+
+        if (!int.TryParse(Console.ReadLine(), out int treinoId)
+            || treinoId <= 0)
+        {
+            Console.WriteLine(
+                "O identificador deve ser um número inteiro maior que zero."
+            );
+            return;
+        }
+
+        Treino? treino = treinoRepositorio.BuscarPorId(treinoId);
+
+        if (treino == null)
+        {
+            Console.WriteLine("Treino não encontrado.");
+            return;
+        }
+
+        Console.WriteLine("Treino selecionado:");
+        MostrarTreinos(new List<Treino> { treino });
+
+        while (true)
+        {
+            Console.Write("Confirma a exclusão deste treino? (S/N): ");
+
+            string confirmacao =
+                (Console.ReadLine() ?? "N").Trim().ToUpperInvariant();
+
+            if (confirmacao == "N")
+            {
+                Console.WriteLine("Exclusão cancelada.");
+                return;
+            }
+
+            if (confirmacao == "S")
+            {
+                break;
+            }
+
+            Console.WriteLine(
+                "Opção inválida. Digite S para confirmar ou N para cancelar."
+            );
+        }
+
+        bool excluido = treinoRepositorio.Excluir(treinoId);
+
+        if (!excluido)
+        {
+            Console.WriteLine("Treino não encontrado.");
+            return;
+        }
+
+        Console.WriteLine("Treino excluído com sucesso!");
+    }
+
+    private void ConsultarResumoPorUsuario()
+    {
+        Console.WriteLine("=== RESUMO DE ATIVIDADES POR USUÁRIO ===");
+
+        List<Usuario> usuarios = usuarioRepositorio.Listar();
+
+        if (usuarios.Count == 0)
+        {
+            Console.WriteLine("Nenhum usuário cadastrado.");
+            return;
+        }
+
+        List<Treino> treinos = treinoRepositorio.Listar();
+
+        foreach (Usuario usuario in usuarios)
+        {
+            List<Treino> treinosDoUsuario = treinos
+                .Where(t => t.UsuarioId == usuario.Id)
+                .ToList();
+
+            int quantidade = treinosDoUsuario.Count;
+
+            long totalMinutos = treinosDoUsuario.Sum(
+                t => (long)t.DuracaoMinutos
+            );
+
+            Console.WriteLine(
+                $"ID: {usuario.Id} | Nome: {usuario.Nome} | " +
+                $"Treinos: {quantidade} | Total: {totalMinutos} minutos"
+            );
+        }
     }
 
     private bool LerDadosTreino(
