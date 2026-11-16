@@ -8,6 +8,11 @@ public class Treino
     public DateTime Data { get; private set; }
     public int DuracaoMinutos { get; private set; }
 
+    // Usado pelo Entity Framework ao carregar registros do banco.
+    private Treino()
+    {
+    }
+
     public Treino(
         int usuarioId,
         string modalidade,
@@ -45,17 +50,19 @@ public class Treino
             );
         }
 
-        if (data.Year < 1000)
+        if (modalidade.Any(char.IsDigit))
         {
             throw new ArgumentException(
-                "A data deve ser a partir de 01/01/1000."
+                "A modalidade não pode conter números."
             );
         }
 
-        if (data.Date > DateTime.Today)
+        DateTime dataLimite = new DateTime(2026, 12, 14);
+
+        if (data.Year < 1000 || data.Date > dataLimite)
         {
             throw new ArgumentException(
-                "A data do treino não pode ser futura."
+                "A data deve estar entre 01/01/1000 e 14/12/2026."
             );
         }
 
