@@ -1,3 +1,6 @@
+// os comandos pra testar o cdg: $env:CONTROLE_TREINOS_CONEXAO = 'Server=127.0.0.1;Port=3306;Database=controle_treinos;User ID=root;Password=Senac2026;'
+// cd ControleTreinos e dps dotnet run
+
 using System.Globalization;
 using ControleTreinos.Data;
 using ControleTreinos.Models;
