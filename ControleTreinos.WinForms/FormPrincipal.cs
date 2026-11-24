@@ -20,18 +20,15 @@ public class FormPrincipal : Form
     {
         Text = "Sistema de Controle de Treinos";
         StartPosition = FormStartPosition.CenterScreen;
-        ClientSize = new Size(820, 460);
-        MinimumSize = new Size(700, 420);
-
-        Font = new Font("Segoe UI", 10F);
-        BackColor = Color.FromArgb(245, 247, 250);
+        ClientSize = new Size(900, 500);
+        MinimumSize = new Size(760, 460);
 
         TableLayoutPanel estrutura = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            Padding = new Padding(24),
             ColumnCount = 1,
-            RowCount = 5
+            RowCount = 4,
+            Margin = new Padding(0)
         };
 
         estrutura.ColumnStyles.Add(
@@ -39,45 +36,98 @@ public class FormPrincipal : Form
         );
 
         estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         estrutura.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+
+        TableLayoutPanel cabecalho = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            ColumnCount = 1,
+            RowCount = 2,
+            Padding = new Padding(24),
+            Margin = new Padding(0),
+            BackColor = Tema.AzulEscuro
+        };
+
+        cabecalho.ColumnStyles.Add(
+            new ColumnStyle(SizeType.Percent, 100)
+        );
+
+        cabecalho.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        cabecalho.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
         Label titulo = new Label
         {
             Text = "Sistema de Controle de Treinos",
             AutoSize = true,
             Dock = DockStyle.Fill,
-            Font = new Font("Segoe UI", 20F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(22, 43, 73),
+            Font = new Font("Segoe UI", 22F, FontStyle.Bold),
+            ForeColor = Color.White,
             Margin = new Padding(0, 0, 0, 8)
         };
 
         Label subtitulo = new Label
         {
-            Text = "Organize usuários, treinos e histórico de atividades.",
+            Text = "Esporte e qualidade de vida — escolha uma área para continuar.",
             AutoSize = true,
             Dock = DockStyle.Fill,
-            ForeColor = Color.DimGray,
-            Margin = new Padding(0, 0, 0, 16)
+            ForeColor = Color.FromArgb(214, 226, 242),
+            Margin = new Padding(0)
         };
+
+        cabecalho.Controls.Add(titulo, 0, 0);
+        cabecalho.Controls.Add(subtitulo, 0, 1);
 
         FlowLayoutPanel painelOpcoes = new FlowLayoutPanel
         {
             Dock = DockStyle.Fill,
             AutoScroll = true,
             WrapContents = true,
+            Padding = new Padding(24, 24, 24, 12),
             Margin = new Padding(0)
         };
 
-        botaoUsuarios = CriarBotaoOpcao("Usuários");
-        botaoTreinos = CriarBotaoOpcao("Treinos");
-        botaoResumo = CriarBotaoOpcao("Resumo de atividades");
+        botaoUsuarios = CriarBotaoMenu(
+            "Usuários",
+            "Cadastro e consulta"
+        );
+
+        botaoTreinos = CriarBotaoMenu(
+            "Treinos",
+            "Registro e histórico"
+        );
+
+        botaoResumo = CriarBotaoMenu(
+            "Resumo",
+            "Quantidade e minutos"
+        );
 
         botaoUsuarios.Click += (sender, e) =>
         {
             using FormUsuarios janela = new FormUsuarios();
+
+            Tema.Aplicar(janela);
+
+            janela.ShowDialog(this);
+        };
+
+        botaoTreinos.Click += (sender, e) =>
+        {
+            using FormTreinos janela = new FormTreinos();
+
+            Tema.Aplicar(janela);
+
+            janela.ShowDialog(this);
+        };
+
+        botaoResumo.Click += (sender, e) =>
+        {
+            using FormResumo janela = new FormResumo();
+
+            Tema.Aplicar(janela);
+
             janela.ShowDialog(this);
         };
 
@@ -89,19 +139,19 @@ public class FormPrincipal : Form
         statusConexao.AutoSize = true;
         statusConexao.Dock = DockStyle.Fill;
         statusConexao.ForeColor = Color.DimGray;
-        statusConexao.Margin = new Padding(0, 8, 0, 12);
+        statusConexao.Margin = new Padding(24, 0, 24, 8);
 
         FlowLayoutPanel rodape = new FlowLayoutPanel
         {
             Dock = DockStyle.Fill,
             AutoSize = true,
             WrapContents = true,
+            Padding = new Padding(24, 0, 24, 20),
             Margin = new Padding(0)
         };
 
         botaoVerificarConexao.Text = "Verificar conexão";
         botaoVerificarConexao.AutoSize = true;
-        botaoVerificarConexao.Padding = new Padding(12, 6, 12, 6);
         botaoVerificarConexao.Margin = new Padding(0, 0, 12, 0);
 
         botaoVerificarConexao.Click += async (sender, e) =>
@@ -113,7 +163,6 @@ public class FormPrincipal : Form
         {
             Text = "Sair",
             AutoSize = true,
-            Padding = new Padding(12, 6, 12, 6),
             Margin = new Padding(0)
         };
 
@@ -122,13 +171,14 @@ public class FormPrincipal : Form
         rodape.Controls.Add(botaoVerificarConexao);
         rodape.Controls.Add(botaoSair);
 
-        estrutura.Controls.Add(titulo, 0, 0);
-        estrutura.Controls.Add(subtitulo, 0, 1);
-        estrutura.Controls.Add(painelOpcoes, 0, 2);
-        estrutura.Controls.Add(statusConexao, 0, 3);
-        estrutura.Controls.Add(rodape, 0, 4);
+        estrutura.Controls.Add(cabecalho, 0, 0);
+        estrutura.Controls.Add(painelOpcoes, 0, 1);
+        estrutura.Controls.Add(statusConexao, 0, 2);
+        estrutura.Controls.Add(rodape, 0, 3);
 
         Controls.Add(estrutura);
+
+        Tema.Aplicar(this);
 
         Shown += async (sender, e) =>
         {
@@ -136,14 +186,16 @@ public class FormPrincipal : Form
         };
     }
 
-    private Button CriarBotaoOpcao(string texto)
+    private Button CriarBotaoMenu(string titulo, string descricao)
     {
         return new Button
         {
-            Text = texto,
-            Width = 220,
-            Height = 72,
-            Margin = new Padding(0, 12, 12, 0),
+            Text = titulo + Environment.NewLine + descricao,
+            Width = 240,
+            Height = 115,
+            Font = new Font("Segoe UI", 12F, FontStyle.Bold),
+            TextAlign = ContentAlignment.MiddleCenter,
+            Margin = new Padding(0, 0, 16, 16),
             Enabled = false
         };
     }
@@ -152,6 +204,8 @@ public class FormPrincipal : Form
     {
         botaoVerificarConexao.Enabled = false;
         botaoUsuarios.Enabled = false;
+        botaoTreinos.Enabled = false;
+        botaoResumo.Enabled = false;
 
         statusConexao.Text = "Verificando conexão com o MySQL...";
         statusConexao.ForeColor = Color.DimGray;
@@ -169,9 +223,11 @@ public class FormPrincipal : Form
             }
 
             statusConexao.Text = "Conectado ao MySQL.";
-            statusConexao.ForeColor = Color.DarkGreen;
+            statusConexao.ForeColor = Tema.Verde;
 
             botaoUsuarios.Enabled = true;
+            botaoTreinos.Enabled = true;
+            botaoResumo.Enabled = true;
         }
         catch (Exception erro)
         {
@@ -181,7 +237,7 @@ public class FormPrincipal : Form
             }
 
             statusConexao.Text = "Conexão com o MySQL indisponível.";
-            statusConexao.ForeColor = Color.Firebrick;
+            statusConexao.ForeColor = Tema.Vermelho;
 
             MessageBox.Show(
                 this,
