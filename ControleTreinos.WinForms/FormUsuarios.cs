@@ -28,168 +28,56 @@ public class FormUsuarios : Form
     {
         Text = "Usuários - Controle de Treinos";
         StartPosition = FormStartPosition.CenterParent;
-        ClientSize = new Size(840, 520);
-        MinimumSize = new Size(700, 420);
+        AutoScaleMode = AutoScaleMode.Dpi;
+        ClientSize = new Size(1120, 700);
+        MinimumSize = new Size(900, 560);
+        var pagina = new LayoutPagina("Usuários",
+            "Cadastre as pessoas que terão seus treinos acompanhados.");
 
-        Font = new Font("Segoe UI", 10F);
-        BackColor = Color.FromArgb(245, 247, 250);
-
-        TableLayoutPanel estrutura = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            Padding = new Padding(20),
-            ColumnCount = 1,
-            RowCount = 5
-        };
-
-        estrutura.ColumnStyles.Add(
-            new ColumnStyle(SizeType.Percent, 100)
-        );
-
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-
-        Label titulo = new Label
-        {
-            Text = "Usuários",
-            AutoSize = true,
-            Font = new Font("Segoe UI", 20F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(22, 43, 73),
-            Margin = new Padding(0, 0, 0, 16)
-        };
-
-        TableLayoutPanel campos = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            AutoSize = true,
-            ColumnCount = 4,
-            RowCount = 1,
-            Margin = new Padding(0, 0, 0, 12)
-        };
-
-        campos.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        campos.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        campos.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        campos.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
-
-        Label rotuloNome = new Label
-        {
-            Text = "Nome:",
-            AutoSize = true,
-            Anchor = AnchorStyles.Left,
-            Margin = new Padding(0, 0, 8, 0)
-        };
-
-        campoNome.Dock = DockStyle.Fill;
         campoNome.MaxLength = 100;
-        campoNome.AccessibleName = "Nome do usuário";
-        campoNome.Margin = new Padding(0, 3, 16, 3);
-
-        Label rotuloIdade = new Label
-        {
-            Text = "Idade:",
-            AutoSize = true,
-            Anchor = AnchorStyles.Left,
-            Margin = new Padding(0, 0, 8, 0)
-        };
-
-        campoIdade.Dock = DockStyle.Fill;
+        campoNome.PlaceholderText = "Nome completo";
         campoIdade.Minimum = 1;
         campoIdade.Maximum = int.MaxValue;
         campoIdade.Value = 1;
-        campoIdade.AccessibleName = "Idade do usuário";
+        Componentes.Botao(botaoCadastrar, "Cadastrar usuário");
+        Componentes.Botao(botaoAtualizar, "Atualizar lista");
+        Componentes.Botao(botaoFechar, "Fechar");
+        botaoCadastrar.Dock = DockStyle.Fill;
+        botaoCadastrar.Click += async (_, _) => await CadastrarUsuarioAsync();
+        botaoAtualizar.Click += async (_, _) => await AtualizarListaAsync();
+        botaoFechar.Click += (_, _) => Close();
+        pagina.Acoes.Controls.Add(botaoAtualizar);
+        pagina.Acoes.Controls.Add(botaoFechar);
 
-        campos.Controls.Add(rotuloNome, 0, 0);
-        campos.Controls.Add(campoNome, 1, 0);
-        campos.Controls.Add(rotuloIdade, 2, 0);
-        campos.Controls.Add(campoIdade, 3, 0);
-
-        FlowLayoutPanel botoes = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            AutoSize = true,
-            WrapContents = true,
-            Margin = new Padding(0, 0, 0, 12)
-        };
-
-        ConfigurarBotao(botaoCadastrar, "Cadastrar usuário");
-        ConfigurarBotao(botaoAtualizar, "Atualizar lista");
-        ConfigurarBotao(botaoFechar, "Fechar");
-
-        botaoCadastrar.Click += async (sender, e) =>
-        {
-            await CadastrarUsuarioAsync();
-        };
-
-        botaoAtualizar.Click += async (sender, e) =>
-        {
-            await AtualizarListaAsync();
-        };
-
-        botaoFechar.Click += (sender, e) => Close();
-
-        botoes.Controls.Add(botaoCadastrar);
-        botoes.Controls.Add(botaoAtualizar);
-        botoes.Controls.Add(botaoFechar);
-
-        tabelaUsuarios.Dock = DockStyle.Fill;
         tabelaUsuarios.ReadOnly = true;
         tabelaUsuarios.AllowUserToAddRows = false;
         tabelaUsuarios.AllowUserToDeleteRows = false;
         tabelaUsuarios.AutoGenerateColumns = false;
         tabelaUsuarios.RowHeadersVisible = false;
         tabelaUsuarios.MultiSelect = false;
-        tabelaUsuarios.SelectionMode =
-            DataGridViewSelectionMode.FullRowSelect;
-
-        tabelaUsuarios.AutoSizeColumnsMode =
-            DataGridViewAutoSizeColumnsMode.Fill;
-
-        tabelaUsuarios.BackgroundColor = Color.White;
-        tabelaUsuarios.Margin = new Padding(0);
+        tabelaUsuarios.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        tabelaUsuarios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         tabelaUsuarios.AccessibleName = "Usuários cadastrados";
-
         tabelaUsuarios.Columns.AddRange(
-            new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = nameof(Usuario.Id),
-                HeaderText = "ID",
-                FillWeight = 15
-            },
-            new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = nameof(Usuario.Nome),
-                HeaderText = "Nome",
-                FillWeight = 65
-            },
-            new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = nameof(Usuario.Idade),
-                HeaderText = "Idade",
-                FillWeight = 20
-            }
+            new DataGridViewTextBoxColumn { DataPropertyName = nameof(Usuario.Id), HeaderText = "ID", FillWeight = 15, MinimumWidth = 55 },
+            new DataGridViewTextBoxColumn { DataPropertyName = nameof(Usuario.Nome), HeaderText = "Nome", FillWeight = 65, MinimumWidth = 160 },
+            new DataGridViewTextBoxColumn { DataPropertyName = nameof(Usuario.Idade), HeaderText = "Idade", FillWeight = 20, MinimumWidth = 80 }
         );
-
-        status.Text = "Aguardando carregamento.";
-        status.AutoSize = true;
-        status.ForeColor = Color.DimGray;
-        status.Margin = new Padding(0, 12, 0, 0);
-
-        estrutura.Controls.Add(titulo, 0, 0);
-        estrutura.Controls.Add(campos, 0, 1);
-        estrutura.Controls.Add(botoes, 0, 2);
-        estrutura.Controls.Add(tabelaUsuarios, 0, 3);
-        estrutura.Controls.Add(status, 0, 4);
-
-        Controls.Add(estrutura);
+        var editor = Componentes.Editor(new Label { Text = "Novo usuário" },
+            Componentes.Campo("Nome", campoNome, "Até 100 caracteres."),
+            Componentes.Campo("Idade em anos", campoIdade),
+            botaoCadastrar);
+        pagina.Conteudo(Componentes.Dividir(Componentes.Lista("Pessoas cadastradas", tabelaUsuarios), editor));
+        status.Text = "Carregando usuários...";
+        pagina.Rodape(status);
+        Controls.Add(pagina);
+        Tema.Aplicar(this);
 
         Shown += async (sender, e) =>
         {
+            botaoFechar.Visible = TopLevel;
             await AtualizarListaAsync();
-            campoNome.Focus();
+            if (!IsDisposed && !Disposing) campoNome.Focus();
         };
 
         FormClosing += (sender, e) =>
@@ -208,14 +96,6 @@ public class FormUsuarios : Form
                 );
             }
         };
-    }
-
-    private void ConfigurarBotao(Button botao, string texto)
-    {
-        botao.Text = texto;
-        botao.AutoSize = true;
-        botao.Padding = new Padding(12, 6, 12, 6);
-        botao.Margin = new Padding(0, 0, 12, 0);
     }
 
     private void DefinirOcupado(bool ocupado)

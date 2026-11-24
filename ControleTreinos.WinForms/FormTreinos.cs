@@ -50,273 +50,108 @@ public class FormTreinos : Form
     {
         Text = "Treinos - Controle de Treinos";
         StartPosition = FormStartPosition.CenterParent;
-        ClientSize = new Size(960, 620);
-        MinimumSize = new Size(820, 560);
+        AutoScaleMode = AutoScaleMode.Dpi;
+        ClientSize = new Size(1120, 720);
+        MinimumSize = new Size(900, 600);
 
-        Font = new Font("Segoe UI", 10F);
-        BackColor = Color.FromArgb(245, 247, 250);
+        var pagina = new LayoutPagina("Treinos",
+            "Registre atividades e mantenha o histórico organizado.");
 
-        TableLayoutPanel estrutura = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            AutoScroll = true,
-            Padding = new Padding(20),
-            ColumnCount = 1,
-            RowCount = 7
-        };
-
-        estrutura.ColumnStyles.Add(
-            new ColumnStyle(SizeType.Percent, 100)
-        );
-
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-
-        Label titulo = new Label
-        {
-            Text = "Treinos",
-            AutoSize = true,
-            Font = new Font("Segoe UI", 20F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(22, 43, 73),
-            Margin = new Padding(0, 0, 0, 8)
-        };
-
-        rotuloModo.AutoSize = true;
-        rotuloModo.ForeColor = Color.DarkBlue;
-        rotuloModo.Margin = new Padding(0, 0, 0, 12);
-
-        TableLayoutPanel campos = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            AutoSize = true,
-            ColumnCount = 4,
-            RowCount = 3,
-            Margin = new Padding(0, 0, 0, 12)
-        };
-
-        campos.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        campos.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-        campos.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        campos.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-
-        for (int i = 0; i < 3; i++)
-        {
-            campos.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        }
-
-        campoUsuario.Dock = DockStyle.Fill;
         ConfigurarListaUsuarios(campoUsuario);
-
-        campoModalidade.Dock = DockStyle.Fill;
         campoModalidade.MaxLength = 50;
-
-        campoData.Dock = DockStyle.Fill;
+        campoModalidade.PlaceholderText = "Ex.: musculação";
         campoData.Culture = CultureInfo.GetCultureInfo("pt-BR");
         campoData.Mask = "00/00/0000";
         campoData.TextMaskFormat = MaskFormat.IncludeLiterals;
-
-        campoData.Text = ObterDataPadrao().ToString(
-            "dd/MM/yyyy",
-            CultureInfo.InvariantCulture
-        );
-
-        campoDuracao.Dock = DockStyle.Fill;
+        campoData.Text = ObterDataPadrao().ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
         campoDuracao.Minimum = 1;
         campoDuracao.Maximum = int.MaxValue;
         campoDuracao.Value = 1;
 
-        campos.Controls.Add(CriarRotulo("Usuário:"), 0, 0);
-        campos.Controls.Add(campoUsuario, 1, 0);
-        campos.SetColumnSpan(campoUsuario, 3);
+        Componentes.Botao(botaoSalvar, "Cadastrar treino");
+        Componentes.Botao(botaoEditar, "Editar selecionado");
+        Componentes.Botao(botaoExcluir, "Excluir selecionado");
+        Componentes.Botao(botaoCancelarEdicao, "Cancelar edição");
+        Componentes.Botao(botaoAtualizar, "Atualizar lista");
+        Componentes.Botao(botaoFechar, "Fechar");
+        Componentes.Botao(botaoBuscar, "Buscar");
+        Componentes.Botao(botaoMostrarTodos, "Mostrar todos");
+        botaoBuscar.Tag = EstiloBotao.Primario;
+        Tema.PrepararBotao(botaoBuscar);
 
-        campos.Controls.Add(CriarRotulo("Modalidade:"), 0, 1);
-        campos.Controls.Add(campoModalidade, 1, 1);
-        campos.SetColumnSpan(campoModalidade, 3);
-
-        campos.Controls.Add(
-            CriarRotulo("Data (dd/MM/aaaa):"),
-            0,
-            2
-        );
-
-        campos.Controls.Add(campoData, 1, 2);
-
-        campos.Controls.Add(
-            CriarRotulo("Duração (minutos):"),
-            2,
-            2
-        );
-
-        campos.Controls.Add(campoDuracao, 3, 2);
-
-        FlowLayoutPanel botoes = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            AutoSize = true,
-            WrapContents = true,
-            Margin = new Padding(0, 0, 0, 12)
-        };
-
-        ConfigurarBotao(botaoSalvar, "Cadastrar treino");
-        ConfigurarBotao(botaoEditar, "Editar selecionado");
-        ConfigurarBotao(botaoExcluir, "Excluir selecionado");
-        ConfigurarBotao(botaoCancelarEdicao, "Cancelar edição");
-        ConfigurarBotao(botaoAtualizar, "Atualizar lista");
-        ConfigurarBotao(botaoFechar, "Fechar");
-
-        botaoSalvar.Click += async (sender, e) =>
-        {
-            await SalvarTreinoAsync();
-        };
-
-        botaoEditar.Click += async (sender, e) =>
-        {
-            await CarregarEdicaoAsync();
-        };
-
-        botaoExcluir.Click += async (sender, e) =>
-        {
-            await ExcluirTreinoAsync();
-        };
-
-        botaoCancelarEdicao.Click += (sender, e) =>
-        {
-            CancelarEdicao();
-        };
-
-        botaoAtualizar.Click += async (sender, e) =>
-        {
-            await AtualizarListaAsync();
-        };
-
-        botaoFechar.Click += (sender, e) => Close();
-
-        botoes.Controls.Add(botaoSalvar);
-        botoes.Controls.Add(botaoEditar);
-        botoes.Controls.Add(botaoExcluir);
-        botoes.Controls.Add(botaoCancelarEdicao);
-        botoes.Controls.Add(botaoAtualizar);
-        botoes.Controls.Add(botaoFechar);
-
-        FlowLayoutPanel filtros = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            AutoSize = true,
-            WrapContents = true,
-            Margin = new Padding(0, 0, 0, 12)
-        };
-
-        Label rotuloFiltro = CriarRotulo(
-            "Filtrar treinos por usuário:"
-        );
-
-        rotuloFiltro.Margin = new Padding(0, 8, 8, 0);
+        botaoSalvar.Click += async (_, _) => await SalvarTreinoAsync();
+        botaoEditar.Click += async (_, _) => await CarregarEdicaoAsync();
+        botaoExcluir.Click += async (_, _) => await ExcluirTreinoAsync();
+        botaoCancelarEdicao.Click += (_, _) => CancelarEdicao();
+        botaoAtualizar.Click += async (_, _) => await AtualizarListaAsync();
+        botaoFechar.Click += (_, _) => Close();
+        botaoBuscar.Click += async (_, _) => await BuscarPorUsuarioAsync();
+        botaoMostrarTodos.Click += async (_, _) => await MostrarTodosAsync();
+        pagina.Acoes.Controls.Add(botaoAtualizar);
+        pagina.Acoes.Controls.Add(botaoFechar);
 
         ConfigurarListaUsuarios(campoFiltroUsuario);
-        campoFiltroUsuario.Width = 260;
-        campoFiltroUsuario.Margin = new Padding(0, 3, 12, 3);
+        var filtro = Componentes.Coluna();
+        filtro.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        filtro.Controls.Add(Componentes.Campo("Filtrar por usuário", campoFiltroUsuario));
+        var acoesFiltro = Componentes.BarraAcoes();
+        acoesFiltro.Controls.Add(botaoBuscar);
+        acoesFiltro.Controls.Add(botaoMostrarTodos);
+        acoesFiltro.Margin = new Padding(0, 0, 0, 12);
+        filtro.Controls.Add(acoesFiltro);
 
-        ConfigurarBotao(botaoBuscar, "Buscar");
-        ConfigurarBotao(botaoMostrarTodos, "Mostrar todos");
-
-        botaoBuscar.Click += async (sender, e) =>
-        {
-            await BuscarPorUsuarioAsync();
-        };
-
-        botaoMostrarTodos.Click += async (sender, e) =>
-        {
-            await MostrarTodosAsync();
-        };
-
-        filtros.Controls.Add(rotuloFiltro);
-        filtros.Controls.Add(campoFiltroUsuario);
-        filtros.Controls.Add(botaoBuscar);
-        filtros.Controls.Add(botaoMostrarTodos);
-
-        tabelaTreinos.Dock = DockStyle.Fill;
-        tabelaTreinos.MinimumSize = new Size(0, 140);
         tabelaTreinos.ReadOnly = true;
         tabelaTreinos.AllowUserToAddRows = false;
         tabelaTreinos.AllowUserToDeleteRows = false;
         tabelaTreinos.AutoGenerateColumns = false;
         tabelaTreinos.RowHeadersVisible = false;
         tabelaTreinos.MultiSelect = false;
-
-        tabelaTreinos.SelectionMode =
-            DataGridViewSelectionMode.FullRowSelect;
-
-        tabelaTreinos.AutoSizeColumnsMode =
-            DataGridViewAutoSizeColumnsMode.Fill;
-
-        tabelaTreinos.BackgroundColor = Color.White;
-        tabelaTreinos.Margin = new Padding(0);
-
+        tabelaTreinos.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        tabelaTreinos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        tabelaTreinos.AccessibleName = "Histórico de treinos";
         tabelaTreinos.Columns.AddRange(
-            new DataGridViewTextBoxColumn
-            {
-                Name = nameof(Treino.Id),
-                DataPropertyName = nameof(Treino.Id),
-                HeaderText = "ID treino",
-                FillWeight = 12
-            },
-            new DataGridViewTextBoxColumn
-            {
-                Name = "Usuario",
-                DataPropertyName = "Usuario",
-                HeaderText = "Usuário",
-                FillWeight = 30
-            },
-            new DataGridViewTextBoxColumn
-            {
-                Name = nameof(Treino.Modalidade),
-                DataPropertyName = nameof(Treino.Modalidade),
-                HeaderText = "Modalidade",
-                FillWeight = 26
-            },
-            new DataGridViewTextBoxColumn
-            {
-                Name = nameof(Treino.Data),
-                DataPropertyName = nameof(Treino.Data),
-                HeaderText = "Data",
-                FillWeight = 18,
-                DefaultCellStyle = new DataGridViewCellStyle
-                {
-                    Format = "dd/MM/yyyy",
-                    FormatProvider = CultureInfo.InvariantCulture
-                }
-            },
-            new DataGridViewTextBoxColumn
-            {
-                Name = nameof(Treino.DuracaoMinutos),
-                DataPropertyName = nameof(Treino.DuracaoMinutos),
-                HeaderText = "Duração (min)",
-                FillWeight = 18
-            }
+            new DataGridViewTextBoxColumn { Name = nameof(Treino.Id), DataPropertyName = nameof(Treino.Id), HeaderText = "ID", FillWeight = 10, MinimumWidth = 45 },
+            new DataGridViewTextBoxColumn { Name = "Usuario", DataPropertyName = "Usuario", HeaderText = "Usuário", FillWeight = 28, MinimumWidth = 100 },
+            new DataGridViewTextBoxColumn { Name = nameof(Treino.Modalidade), DataPropertyName = nameof(Treino.Modalidade), HeaderText = "Modalidade", FillWeight = 27, MinimumWidth = 100 },
+            new DataGridViewTextBoxColumn { Name = nameof(Treino.Data), DataPropertyName = nameof(Treino.Data), HeaderText = "Data", FillWeight = 22, MinimumWidth = 104,
+                DefaultCellStyle = new DataGridViewCellStyle { Format = "dd/MM/yyyy", FormatProvider = CultureInfo.InvariantCulture } },
+            new DataGridViewTextBoxColumn { Name = nameof(Treino.DuracaoMinutos), DataPropertyName = nameof(Treino.DuracaoMinutos), HeaderText = "Minutos", FillWeight = 15, MinimumWidth = 78,
+                DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleRight, Format = "N0", FormatProvider = CultureInfo.GetCultureInfo("pt-BR") } }
         );
+        tabelaTreinos.SelectionChanged += (_, _) => AtualizarControles();
+        tabelaTreinos.CellDoubleClick += async (_, e) =>
+        {
+            if (e.RowIndex >= 0) await CarregarEdicaoAsync();
+        };
+        var acoesLista = Componentes.BarraAcoes();
+        acoesLista.Controls.Add(botaoEditar);
+        acoesLista.Controls.Add(botaoExcluir);
+        var lista = Componentes.Lista("Histórico de treinos", tabelaTreinos, filtro, acoesLista);
 
-        status.Text = "Aguardando carregamento.";
-        status.AutoSize = true;
-        status.ForeColor = Color.DimGray;
-        status.Margin = new Padding(0, 12, 0, 0);
+        var acoesEditor = Componentes.Coluna();
+        acoesEditor.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        botaoSalvar.Dock = DockStyle.Fill;
+        botaoCancelarEdicao.Dock = DockStyle.Fill;
+        acoesEditor.Controls.Add(botaoSalvar);
+        acoesEditor.Controls.Add(botaoCancelarEdicao);
+        var nota = Componentes.Rotulo("Cada treino pertence a um usuário cadastrado.", Tema.TextoSecundario);
+        nota.Margin = new Padding(0, 0, 0, 18);
+        var editor = Componentes.Editor(rotuloModo,
+            Componentes.Campo("Usuário", campoUsuario),
+            Componentes.Campo("Modalidade", campoModalidade),
+            Componentes.Campo("Data do treino", campoData, "De 01/01/1000 até 14/12/2026"),
+            Componentes.Campo("Duração em minutos", campoDuracao),
+            nota, acoesEditor);
 
-        estrutura.Controls.Add(titulo, 0, 0);
-        estrutura.Controls.Add(rotuloModo, 0, 1);
-        estrutura.Controls.Add(campos, 0, 2);
-        estrutura.Controls.Add(botoes, 0, 3);
-        estrutura.Controls.Add(filtros, 0, 4);
-        estrutura.Controls.Add(tabelaTreinos, 0, 5);
-        estrutura.Controls.Add(status, 0, 6);
-
-        Controls.Add(estrutura);
+        pagina.Conteudo(Componentes.Dividir(lista, editor));
+        status.Text = "Carregando histórico...";
+        pagina.Rodape(status);
+        Controls.Add(pagina);
+        Tema.Aplicar(this);
 
         Shown += async (sender, e) =>
         {
+            botaoFechar.Visible = TopLevel;
             await AtualizarListaAsync();
 
             if (!IsDisposed && !Disposing)
@@ -365,25 +200,6 @@ public class FormTreinos : Form
         AtualizarControles();
     }
 
-    private Label CriarRotulo(string texto)
-    {
-        return new Label
-        {
-            Text = texto,
-            AutoSize = true,
-            Anchor = AnchorStyles.Left,
-            Margin = new Padding(0, 0, 8, 0)
-        };
-    }
-
-    private void ConfigurarBotao(Button botao, string texto)
-    {
-        botao.Text = texto;
-        botao.AutoSize = true;
-        botao.Padding = new Padding(12, 6, 12, 6);
-        botao.Margin = new Padding(0, 0, 12, 0);
-    }
-
     private void ConfigurarListaUsuarios(ComboBox lista)
     {
         lista.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -428,7 +244,7 @@ public class FormTreinos : Form
         bool podeSelecionar =
             podePreencher
             && !editando
-            && tabelaTreinos.Rows.Count > 0;
+            && tabelaTreinos.SelectedRows.Count > 0;
 
         campoUsuario.Enabled = podePreencher && !editando;
         campoModalidade.Enabled = podePreencher;
@@ -444,6 +260,7 @@ public class FormTreinos : Form
         botaoEditar.Enabled = podeSelecionar;
         botaoExcluir.Enabled = podeSelecionar;
 
+        botaoCancelarEdicao.Visible = editando;
         botaoCancelarEdicao.Enabled =
             !operacaoEmAndamento && editando;
 
@@ -464,8 +281,8 @@ public class FormTreinos : Form
         tabelaTreinos.Enabled =
             !operacaoEmAndamento && !editando;
 
-        rotuloModo.Text = editando
-            ? $"Editando treino #{treinoEmEdicao.Value}. O usuário permanece o mesmo."
+        rotuloModo.Text = treinoEmEdicao is int id
+            ? $"Editar treino #{id}"
             : "Novo treino";
     }
 

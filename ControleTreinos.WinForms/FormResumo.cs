@@ -23,91 +23,35 @@ public class FormResumo : Form
     private readonly Label status = new Label();
 
     private bool operacaoEmAndamento;
+    private readonly Indicador totalUsuarios = new("Usuários no resumo");
+    private readonly Indicador totalTreinos = new("Treinos registrados");
+    private readonly Indicador totalMinutos = new("Minutos de atividade");
 
     public FormResumo()
     {
         Text = "Resumo de atividades - Controle de Treinos";
         StartPosition = FormStartPosition.CenterParent;
-        ClientSize = new Size(840, 500);
-        MinimumSize = new Size(700, 420);
+        AutoScaleMode = AutoScaleMode.Dpi;
+        ClientSize = new Size(1120, 700);
+        MinimumSize = new Size(800, 560);
+        var pagina = new LayoutPagina("Resumo de atividades",
+            "Consulte a quantidade de treinos e o tempo registrado por pessoa.");
+        Componentes.Botao(botaoAtualizar, "Atualizar resumo");
+        Componentes.Botao(botaoFechar, "Fechar");
+        botaoAtualizar.Click += async (_, _) => await AtualizarResumoAsync();
+        botaoFechar.Click += (_, _) => Close();
+        pagina.Acoes.Controls.Add(botaoAtualizar);
+        pagina.Acoes.Controls.Add(botaoFechar);
 
-        TableLayoutPanel estrutura = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            Padding = new Padding(20),
-            ColumnCount = 1,
-            RowCount = 5
-        };
-
-        estrutura.ColumnStyles.Add(
-            new ColumnStyle(SizeType.Percent, 100)
-        );
-
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        estrutura.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-
-        Label titulo = new Label
-        {
-            Text = "Resumo de atividades",
-            AutoSize = true,
-            Font = new Font("Segoe UI", 20F, FontStyle.Bold),
-            ForeColor = Tema.AzulEscuro,
-            Margin = new Padding(0, 0, 0, 8)
-        };
-
-        Label descricao = new Label
-        {
-            Text = "Quantidade de treinos e total de minutos por usuário.",
-            AutoSize = true,
-            ForeColor = Color.DimGray,
-            Margin = new Padding(0, 0, 0, 16)
-        };
-
-        FlowLayoutPanel botoes = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            AutoSize = true,
-            WrapContents = true,
-            Margin = new Padding(0, 0, 0, 12)
-        };
-
-        botaoAtualizar.Text = "Atualizar resumo";
-        botaoAtualizar.AutoSize = true;
-        botaoAtualizar.Margin = new Padding(0, 0, 12, 0);
-
-        botaoAtualizar.Click += async (sender, e) =>
-        {
-            await AtualizarResumoAsync();
-        };
-
-        botaoFechar.Text = "Fechar";
-        botaoFechar.AutoSize = true;
-        botaoFechar.Margin = new Padding(0);
-
-        botaoFechar.Click += (sender, e) => Close();
-
-        botoes.Controls.Add(botaoAtualizar);
-        botoes.Controls.Add(botaoFechar);
-
-        tabelaResumo.Dock = DockStyle.Fill;
         tabelaResumo.ReadOnly = true;
         tabelaResumo.AllowUserToAddRows = false;
         tabelaResumo.AllowUserToDeleteRows = false;
         tabelaResumo.AutoGenerateColumns = false;
         tabelaResumo.RowHeadersVisible = false;
         tabelaResumo.MultiSelect = false;
-
-        tabelaResumo.SelectionMode =
-            DataGridViewSelectionMode.FullRowSelect;
-
-        tabelaResumo.AutoSizeColumnsMode =
-            DataGridViewAutoSizeColumnsMode.Fill;
-
-        tabelaResumo.Margin = new Padding(0);
-
+        tabelaResumo.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        tabelaResumo.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        tabelaResumo.AccessibleName = "Resumo de atividades por usuário";
         tabelaResumo.Columns.AddRange(
             new DataGridViewTextBoxColumn
             {
@@ -155,21 +99,21 @@ public class FormResumo : Form
             }
         );
 
-        status.Text = "Aguardando carregamento.";
-        status.AutoSize = true;
-        status.ForeColor = Color.DimGray;
-        status.Margin = new Padding(0, 12, 0, 0);
-
-        estrutura.Controls.Add(titulo, 0, 0);
-        estrutura.Controls.Add(descricao, 0, 1);
-        estrutura.Controls.Add(botoes, 0, 2);
-        estrutura.Controls.Add(tabelaResumo, 0, 3);
-        estrutura.Controls.Add(status, 0, 4);
-
-        Controls.Add(estrutura);
-
-        Shown += async (sender, e) =>
+        var conteudo = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2, Margin = new Padding(0) };
+        conteudo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        conteudo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        conteudo.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        conteudo.Controls.Add(Componentes.Indicadores(totalUsuarios, totalTreinos, totalMinutos), 0, 0);
+        var nota = Componentes.Rotulo("Inclui usuários que ainda não possuem treinos.", Tema.TextoSecundario);
+        conteudo.Controls.Add(Componentes.Lista("Atividades por usuário", tabelaResumo, acoes: nota), 0, 1);
+        pagina.Conteudo(conteudo);
+        status.Text = "Carregando resumo...";
+        pagina.Rodape(status);
+        Controls.Add(pagina);
+        Tema.Aplicar(this);
+        Shown += async (_, _) =>
         {
+            botaoFechar.Visible = TopLevel;
             await AtualizarResumoAsync();
         };
     }
@@ -229,6 +173,9 @@ public class FormResumo : Form
                 return;
             }
 
+            totalUsuarios.Definir(dados.Count);
+            totalTreinos.Definir(dados.Sum(d => (long)d.QuantidadeTreinos));
+            totalMinutos.Definir(dados.Sum(d => d.TotalMinutos));
             tabelaResumo.DataSource = dados;
             tabelaResumo.ClearSelection();
             tabelaResumo.CurrentCell = null;
