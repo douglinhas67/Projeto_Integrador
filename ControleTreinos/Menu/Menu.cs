@@ -1,5 +1,5 @@
 // os comandos pra testar o cdg: $env:CONTROLE_TREINOS_CONEXAO = 'Server=127.0.0.1;Port=3306;Database=controle_treinos;User ID=root;Password=Senac2026;'
-// cd ControleTreinos e dps dotnet run
+// dotnet run --project .\ControleTreinos.WinForms\ControleTreinos.WinForms.csproj
 
 using System.Globalization;
 using ControleTreinos.Data;
@@ -23,12 +23,13 @@ public class MenuPrincipal
             Console.WriteLine("=== SISTEMA DE CONTROLE DE TREINOS ===");
             Console.WriteLine("1 - Cadastrar usuário");
             Console.WriteLine("2 - Listar usuários");
-            Console.WriteLine("3 - Cadastrar treino");
-            Console.WriteLine("4 - Listar todos os treinos");
-            Console.WriteLine("5 - Buscar treinos por usuário");
-            Console.WriteLine("6 - Editar treino");
-            Console.WriteLine("7 - Excluir treino");
-            Console.WriteLine("8 - Consultar resumo por usuário");
+            Console.WriteLine("3 - Excluir usuário");
+            Console.WriteLine("4 - Cadastrar treino");
+            Console.WriteLine("5 - Listar todos os treinos");
+            Console.WriteLine("6 - Buscar treinos por usuário");
+            Console.WriteLine("7 - Editar treino");
+            Console.WriteLine("8 - Excluir treino");
+            Console.WriteLine("9 - Consultar resumo por usuário");
             Console.WriteLine("0 - Sair");
             Console.Write("Escolha uma opção: ");
 
