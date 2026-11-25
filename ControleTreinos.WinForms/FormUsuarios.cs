@@ -17,6 +17,7 @@ public class FormUsuarios : Form
 
     private readonly Button botaoCadastrar = new Button();
     private readonly Button botaoAtualizar = new Button();
+    private readonly Button botaoExcluir = new Button();
     private readonly Button botaoFechar = new Button();
 
     private readonly DataGridView tabelaUsuarios = new DataGridView();
@@ -41,10 +42,12 @@ public class FormUsuarios : Form
         campoIdade.Value = 1;
         Componentes.Botao(botaoCadastrar, "Cadastrar usuário");
         Componentes.Botao(botaoAtualizar, "Atualizar lista");
+        Componentes.Botao(botaoExcluir, "Excluir selecionado");
         Componentes.Botao(botaoFechar, "Fechar");
         botaoCadastrar.Dock = DockStyle.Fill;
         botaoCadastrar.Click += async (_, _) => await CadastrarUsuarioAsync();
         botaoAtualizar.Click += async (_, _) => await AtualizarListaAsync();
+        botaoExcluir.Click += async (_, _) => await ExcluirUsuarioAsync();
         botaoFechar.Click += (_, _) => Close();
         pagina.Acoes.Controls.Add(botaoAtualizar);
         pagina.Acoes.Controls.Add(botaoFechar);
@@ -63,15 +66,20 @@ public class FormUsuarios : Form
             new DataGridViewTextBoxColumn { DataPropertyName = nameof(Usuario.Nome), HeaderText = "Nome", FillWeight = 65, MinimumWidth = 160 },
             new DataGridViewTextBoxColumn { DataPropertyName = nameof(Usuario.Idade), HeaderText = "Idade", FillWeight = 20, MinimumWidth = 80 }
         );
+        tabelaUsuarios.SelectionChanged += (_, _) => AtualizarBotaoExcluir();
+        var acoesLista = Componentes.BarraAcoes();
+        acoesLista.Controls.Add(botaoExcluir);
         var editor = Componentes.Editor(new Label { Text = "Novo usuário" },
             Componentes.Campo("Nome", campoNome, "Até 100 caracteres."),
             Componentes.Campo("Idade em anos", campoIdade),
             botaoCadastrar);
-        pagina.Conteudo(Componentes.Dividir(Componentes.Lista("Pessoas cadastradas", tabelaUsuarios), editor));
+        var lista = Componentes.Lista("Pessoas cadastradas", tabelaUsuarios, acoes: acoesLista);
+        pagina.Conteudo(Componentes.Dividir(lista, editor));
         status.Text = "Carregando usuários...";
         pagina.Rodape(status);
         Controls.Add(pagina);
         Tema.Aplicar(this);
+        AtualizarBotaoExcluir();
 
         Shown += async (sender, e) =>
         {
@@ -112,6 +120,17 @@ public class FormUsuarios : Form
         botaoCadastrar.Enabled = !ocupado;
         botaoAtualizar.Enabled = !ocupado;
         botaoFechar.Enabled = !ocupado;
+        tabelaUsuarios.Enabled = !ocupado;
+        AtualizarBotaoExcluir();
+    }
+
+    private void AtualizarBotaoExcluir()
+    {
+        if (IsDisposed || Disposing) return;
+
+        botaoExcluir.Enabled = !operacaoEmAndamento
+            && tabelaUsuarios.SelectedRows.Count == 1
+            && tabelaUsuarios.SelectedRows[0].DataBoundItem is Usuario;
     }
 
     private async Task AtualizarListaAsync()
@@ -149,6 +168,8 @@ public class FormUsuarios : Form
             }
 
             tabelaUsuarios.DataSource = usuarios;
+            tabelaUsuarios.ClearSelection();
+            tabelaUsuarios.CurrentCell = null;
             status.Text = $"Usuários cadastrados: {usuarios.Count}.";
         }
         catch (Exception erro)
@@ -157,6 +178,86 @@ public class FormUsuarios : Form
                 "Não foi possível carregar a lista de usuários.",
                 erro
             );
+        }
+    }
+
+    private async Task ExcluirUsuarioAsync()
+    {
+        if (operacaoEmAndamento || IsDisposed || Disposing) return;
+
+        if (tabelaUsuarios.SelectedRows.Count != 1
+            || tabelaUsuarios.SelectedRows[0].DataBoundItem is not Usuario selecionado)
+        {
+            MessageBox.Show(this, "Selecione um usuário na tabela.",
+                "Excluir usuário", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        int usuarioId = selecionado.Id;
+        DefinirOcupado(true);
+        status.Text = "Carregando usuário para confirmação...";
+
+        try
+        {
+            Usuario? usuario = await Task.Run(
+                () => usuarioRepositorio.BuscarPorId(usuarioId)
+            );
+
+            if (IsDisposed || Disposing) return;
+
+            if (usuario == null)
+            {
+                MessageBox.Show(this, "Usuário não encontrado. A lista será atualizada.",
+                    "Excluir usuário", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                await CarregarDadosAsync();
+                return;
+            }
+
+            string mensagem = $"Confirma a exclusão do usuário #{usuario.Id}?"
+                + Environment.NewLine + Environment.NewLine
+                + $"Nome: {usuario.Nome}" + Environment.NewLine
+                + $"Idade: {usuario.Idade} anos" + Environment.NewLine + Environment.NewLine
+                + "Somente usuários sem treinos cadastrados podem ser excluídos.";
+
+            DialogResult resposta = MessageBox.Show(this, mensagem, "Confirmar exclusão",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+
+            if (resposta != DialogResult.Yes)
+            {
+                status.Text = "Exclusão de usuário cancelada.";
+                return;
+            }
+
+            status.Text = "Excluindo usuário...";
+            ResultadoExclusaoUsuario resultado = await Task.Run(
+                () => usuarioRepositorio.Excluir(usuarioId)
+            );
+
+            if (IsDisposed || Disposing) return;
+
+            string retorno = resultado switch
+            {
+                ResultadoExclusaoUsuario.Excluido => "Usuário excluído com sucesso!",
+                ResultadoExclusaoUsuario.PossuiTreinos =>
+                    "Este usuário possui treinos cadastrados e não pode ser excluído."
+                    + Environment.NewLine
+                    + "Exclua os treinos desse usuário na tela Treinos antes de tentar novamente.",
+                _ => "Usuário não encontrado. A lista será atualizada."
+            };
+
+            MessageBox.Show(this, retorno, "Excluir usuário", MessageBoxButtons.OK,
+                resultado == ResultadoExclusaoUsuario.PossuiTreinos
+                    ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+
+            await CarregarDadosAsync();
+        }
+        catch (Exception erro)
+        {
+            MostrarErro("Não foi possível excluir o usuário.", erro);
+        }
+        finally
+        {
+            DefinirOcupado(false);
         }
     }
 

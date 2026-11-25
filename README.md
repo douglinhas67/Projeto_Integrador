@@ -31,6 +31,9 @@ dotnet run --project .\ControleTreinos\ControleTreinos.csproj
 - Visão geral com totais do MySQL e até dez atividades recentes.
 - Tabelas e formulários em áreas separadas, com filtros junto ao histórico.
 - Cadastro e edição identificados no formulário; exclusão exige confirmação.
+- Na tela Usuários, selecione uma pessoa e clique em **Excluir selecionado**.
+  A exclusão é bloqueada enquanto ela possuir treinos; exclua esses treinos
+  pela tela Treinos antes de remover o usuário.
 - A troca de tela respeita o bloqueio durante operações e a confirmação para descartar uma edição de treino.
 
 `Tema.cs` define as cores e fontes. `Componentes.cs` reúne os cartões,
@@ -49,4 +52,23 @@ uma edição, tente trocar de tela e verifique a confirmação. Teste cancelar e
 confirmar uma exclusão, confira os totais no resumo e reabra o programa para
 verificar a persistência. Confira também a janela maximizada, reduzida e na
 escala de tela utilizada no computador da apresentação.
+
+Na tela Usuários, confira que o botão de exclusão fica desabilitado sem seleção.
+Selecione um usuário sem treinos, cancele a confirmação e confira que ele continua
+na lista. Depois confirme a exclusão. Tente excluir um usuário com treinos e
+confira que a operação é bloqueada, mantendo a pessoa e suas atividades.
+
+## Teste de integração da exclusão de usuários
+
+Use um banco MySQL **separado**, vazio ou reservado para testes, com nome
+terminado em `_testes`. O usuário da conexão precisa poder criar as tabelas.
+Configure `CONTROLE_TREINOS_TESTE_CONEXAO` com a conexão desse banco e execute:
+
+```powershell
+dotnet run --project .\tests\ControleTreinos.Integracao\ControleTreinos.Integracao.csproj
+```
+
+O teste verifica exclusão, usuário inexistente, persistência e preservação dos
+treinos. Ele remove os registros que criou e não utiliza a conexão normal do
+aplicativo. A confirmação e o cancelamento na janela devem ser conferidos no Windows.
 
