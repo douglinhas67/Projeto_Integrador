@@ -1,4 +1,4 @@
-// os comandos pra testar o cdg: $env:CONTROLE_TREINOS_CONEXAO = 'Server=127.0.0.1;Port=3306;Database=controle_treinos;User ID=root;Password=Senac2026;'
+// os comandos pra testar o cdg: $env:CONTROLE_TREINOS_CONEXAO = 'Server=127.0.0.1;Port=3306;Database=controle_treinos;User ID=root;Password=SUA_SENHA_DO_MYSQL;'
 // dotnet run --project .\ControleTreinos.WinForms\ControleTreinos.WinForms.csproj
 
 using System.Globalization;
@@ -54,26 +54,30 @@ public class MenuPrincipal
                         break;
 
                     case "3":
-                        CadastrarTreino();
+                        ExcluirUsuario();
                         break;
 
                     case "4":
-                        ListarTreinos();
+                        CadastrarTreino();
                         break;
 
                     case "5":
-                        BuscarTreinosPorUsuario();
+                        ListarTreinos();
                         break;
 
                     case "6":
-                        EditarTreino();
+                        BuscarTreinosPorUsuario();
                         break;
 
                     case "7":
-                        ExcluirTreino();
+                        EditarTreino();
                         break;
 
                     case "8":
+                        ExcluirTreino();
+                        break;
+
+                    case "9":
                         ConsultarResumoPorUsuario();
                         break;
 
@@ -157,6 +161,83 @@ public class MenuPrincipal
                 $"ID: {usuario.Id} | Nome: {usuario.Nome} | " +
                 $"Idade: {usuario.Idade} anos"
             );
+        }
+    }
+
+    private void ExcluirUsuario()
+    {
+        Console.WriteLine("=== EXCLUIR USUÁRIO ===");
+        Console.Write("Identificador do usuário: ");
+
+        if (!int.TryParse(Console.ReadLine(), out int usuarioId)
+            || usuarioId <= 0)
+        {
+            Console.WriteLine(
+                "O identificador deve ser um número inteiro maior que zero."
+            );
+            return;
+        }
+
+        Usuario? usuario = usuarioRepositorio.BuscarPorId(usuarioId);
+
+        if (usuario == null)
+        {
+            Console.WriteLine(
+                "Usuário não encontrado. Use a opção 2 para consultar os IDs."
+            );
+            return;
+        }
+
+        Console.WriteLine(
+            $"ID: {usuario.Id} | Nome: {usuario.Nome} | Idade: {usuario.Idade} anos"
+        );
+        Console.WriteLine(
+            "Somente usuários sem treinos cadastrados podem ser excluídos."
+        );
+
+        while (true)
+        {
+            Console.Write("Confirma a exclusão deste usuário? (S/N): ");
+
+            string confirmacao =
+                (Console.ReadLine() ?? "N").Trim().ToUpperInvariant();
+
+            if (confirmacao == "N")
+            {
+                Console.WriteLine("Exclusão de usuário cancelada.");
+                return;
+            }
+
+            if (confirmacao == "S")
+            {
+                break;
+            }
+
+            Console.WriteLine(
+                "Opção inválida. Digite S para confirmar ou N para cancelar."
+            );
+        }
+
+        ResultadoExclusaoUsuario resultado = usuarioRepositorio.Excluir(usuarioId);
+
+        switch (resultado)
+        {
+            case ResultadoExclusaoUsuario.Excluido:
+                Console.WriteLine("Usuário excluído com sucesso!");
+                break;
+
+            case ResultadoExclusaoUsuario.PossuiTreinos:
+                Console.WriteLine(
+                    "Este usuário possui treinos cadastrados e não pode ser excluído."
+                );
+                Console.WriteLine(
+                    "Use a opção 8 para excluir os treinos desse usuário antes de tentar novamente."
+                );
+                break;
+
+            default:
+                Console.WriteLine("Usuário não encontrado.");
+                break;
         }
     }
 
