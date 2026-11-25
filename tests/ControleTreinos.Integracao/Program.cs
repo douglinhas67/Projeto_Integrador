@@ -1,5 +1,6 @@
 using ControleTreinos.Data;
 using ControleTreinos.Models;
+using ControleTreinos.Menu;
 using Microsoft.EntityFrameworkCore;
 using MySql.Data.MySqlClient;
 
@@ -29,6 +30,26 @@ void Conferir(bool condicao, string descricao)
     if (!condicao) throw new InvalidOperationException("Falhou: " + descricao);
     verificacoes++;
     Console.WriteLine("OK: " + descricao);
+}
+
+string ExecutarMenu(string entrada)
+{
+    TextReader leitorOriginal = Console.In;
+    TextWriter escritorOriginal = Console.Out;
+    using var leitor = new StringReader(entrada);
+    using var escritor = new StringWriter();
+    try
+    {
+        Console.SetIn(leitor);
+        Console.SetOut(escritor);
+        new MenuPrincipal().Exibir();
+        return escritor.ToString();
+    }
+    finally
+    {
+        Console.SetIn(leitorOriginal);
+        Console.SetOut(escritorOriginal);
+    }
 }
 
 try
@@ -79,6 +100,50 @@ try
     Conferir(treinos.Excluir(treino.Id), "exclui o treino pela operação existente");
     Conferir(usuarios.Excluir(comTreinos.Id) == ResultadoExclusaoUsuario.Excluido,
         "permite excluir o usuário após remover seus treinos");
+
+    var peloMenu = new Usuario("Menu " + Guid.NewGuid().ToString("N"), 23);
+    usuarios.Cadastrar(peloMenu);
+    criados.Add(peloMenu.Id);
+    string saida = ExecutarMenu("0\n");
+    Conferir(saida.Contains("9 - Excluir usuário"),
+        "o menu apresenta a opção 9 para excluir usuários");
+
+    foreach (string idInvalido in new[] { "abc", "0", "-1", "2147483648" })
+    {
+        saida = ExecutarMenu($"9\n{idInvalido}\n0\n");
+        Conferir(saida.Contains("O identificador deve ser um número inteiro maior que zero.")
+            && usuarios.BuscarPorId(peloMenu.Id) != null,
+            $"o menu rejeita o identificador inválido {idInvalido}");
+    }
+
+    saida = ExecutarMenu($"9\n{semTreinos.Id}\n0\n");
+    Conferir(saida.Contains("Usuário não encontrado."),
+        "o menu informa quando o usuário não existe");
+
+    saida = ExecutarMenu($"9\n{peloMenu.Id}\nN\n0\n");
+    Conferir(saida.Contains(peloMenu.Nome) && saida.Contains("Exclusão de usuário cancelada.")
+        && usuarios.BuscarPorId(peloMenu.Id) != null,
+        "a confirmação mostra o usuário e cancelar preserva o registro");
+    saida = ExecutarMenu($"9\n{peloMenu.Id}\ntalvez\nn\n0\n");
+    Conferir(saida.Contains("Opção inválida. Digite S")
+        && usuarios.BuscarPorId(peloMenu.Id) != null,
+        "a confirmação inválida não exclui e aceita cancelar com n minúsculo");
+    saida = ExecutarMenu($"9\n{peloMenu.Id}\n");
+    Conferir(saida.Contains("Exclusão de usuário cancelada.")
+        && usuarios.BuscarPorId(peloMenu.Id) != null,
+        "o fim da entrada durante a confirmação cancela a exclusão");
+
+    var treinoMenu = new Treino(peloMenu.Id, "Natação", new DateTime(2026, 11, 25), 45);
+    treinos.Cadastrar(treinoMenu);
+    saida = ExecutarMenu($"9\n{peloMenu.Id}\nS\n0\n");
+    Conferir(saida.Contains("possui treinos cadastrados e não pode ser excluído.")
+        && usuarios.BuscarPorId(peloMenu.Id) != null && treinos.BuscarPorId(treinoMenu.Id) != null,
+        "o menu bloqueia a exclusão e mantém o usuário e seu treino");
+
+    treinos.Excluir(treinoMenu.Id);
+    saida = ExecutarMenu($"9\n{peloMenu.Id}\n s \n0\n");
+    Conferir(saida.Contains("Usuário excluído com sucesso!") && usuarios.BuscarPorId(peloMenu.Id) == null,
+        "o menu exclui o usuário sem treinos após confirmação com s");
     Console.WriteLine($"Concluído: {verificacoes} verificações de integração com MySQL.");
     return 0;
 }

@@ -25,6 +25,10 @@ Para executar a versão de console nesse mesmo terminal:
 dotnet run --project .\ControleTreinos\ControleTreinos.csproj
 ```
 
+No console, escolha **9 — Excluir usuário**, informe o identificador e confirme
+com **S** ou cancele com **N**. A opção **2** permite consultar os identificadores.
+A exclusão é bloqueada enquanto o usuário possuir treinos cadastrados.
+
 ## Interface gráfica
 
 - Navegação lateral entre visão geral, usuários, treinos e resumo, dentro da mesma janela.
@@ -69,6 +73,8 @@ dotnet run --project .\tests\ControleTreinos.Integracao\ControleTreinos.Integrac
 ```
 
 O teste verifica exclusão, usuário inexistente, persistência e preservação dos
-treinos. Ele remove os registros que criou e não utiliza a conexão normal do
-aplicativo. A confirmação e o cancelamento na janela devem ser conferidos no Windows.
+treinos. Também executa o menu do console para testar identificadores inválidos,
+confirmação, cancelamento e exclusão de usuários com e sem treinos. Ele remove
+os registros que criou e não utiliza a conexão normal do aplicativo. A confirmação
+e o cancelamento na janela gráfica devem ser conferidos no Windows.
 
