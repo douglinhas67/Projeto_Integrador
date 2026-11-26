@@ -23,7 +23,7 @@ public class FormTreinos : Form
     private readonly ComboBox campoUsuario = new ComboBox();
     private readonly TextBox campoModalidade = new TextBox();
     private readonly MaskedTextBox campoData = new MaskedTextBox();
-    private readonly NumericUpDown campoDuracao = new NumericUpDown();
+    private readonly TextBox campoDuracao = new TextBox();
 
     private readonly ComboBox campoFiltroUsuario = new ComboBox();
     private readonly Button botaoBuscar = new Button();
@@ -64,9 +64,7 @@ public class FormTreinos : Form
         campoData.Mask = "00/00/0000";
         campoData.TextMaskFormat = MaskFormat.IncludeLiterals;
         campoData.Text = ObterDataPadrao().ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
-        campoDuracao.Minimum = 1;
-        campoDuracao.Maximum = int.MaxValue;
-        campoDuracao.Value = 1;
+        campoDuracao.Text = "1";
 
         Componentes.Botao(botaoSalvar, "Cadastrar treino");
         Componentes.Botao(botaoEditar, "Editar selecionado");
@@ -578,7 +576,7 @@ public class FormTreinos : Form
                 CultureInfo.InvariantCulture
             );
 
-            campoDuracao.Value = treino.DuracaoMinutos;
+            campoDuracao.Text = treino.DuracaoMinutos.ToString(CultureInfo.InvariantCulture);
 
             treinoEmEdicao = treino.Id;
 
@@ -787,12 +785,10 @@ public class FormTreinos : Form
             return false;
         }
 
-        duracaoMinutos = (int)campoDuracao.Value;
-
-        if (duracaoMinutos <= 0)
+        if (!ValidacaoNumerica.TentarLerInteiroPositivo(campoDuracao.Text, out duracaoMinutos))
         {
             MostrarValidacao(
-                "A duração deve ser maior que zero.",
+                "A duração deve ser um número inteiro de minutos maior que zero, sem casas decimais.",
                 campoDuracao
             );
 
@@ -943,7 +939,7 @@ public class FormTreinos : Form
         }
 
         campoModalidade.Clear();
-        campoDuracao.Value = 1;
+        campoDuracao.Text = "1";
 
         campoData.Text = ObterDataPadrao().ToString(
             "dd/MM/yyyy",
