@@ -12,7 +12,7 @@ Pré-requisitos: SDK .NET 10, MySQL em execução e as tabelas criadas pelo arqu
 `Banco.sql`. No terminal PowerShell, na raiz do repositório:
 
 ```powershell
-$env:CONTROLE_TREINOS_CONEXAO = 'Server=127.0.0.1;Port=3306;Database=controle_treinos;User ID=root;Password=SUA_SENHA_DO_MYSQL;'
+$env:CONTROLE_TREINOS_CONEXAO = 'Server=127.0.0.1;Port=3306;Database=controle_treinos;User ID=root;Password=SENAC2026;'
 dotnet run --project .\ControleTreinos.WinForms\ControleTreinos.WinForms.csproj
 ```
 

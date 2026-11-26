@@ -1,4 +1,4 @@
-// os comandos pra testar o cdg: $env:CONTROLE_TREINOS_CONEXAO = 'Server=127.0.0.1;Port=3306;Database=controle_treinos;User ID=root;Password=SUA_SENHA_DO_MYSQL;'
+// os comandos pra testar o cdg: $env:CONTROLE_TREINOS_CONEXAO = 'Server=127.0.0.1;Port=3306;Database=controle_treinos;User ID=root;Password=Senac2026;'
 // dotnet run --project .\ControleTreinos.WinForms\ControleTreinos.WinForms.csproj
 
 using System.Globalization;
