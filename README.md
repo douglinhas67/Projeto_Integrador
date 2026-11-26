@@ -78,3 +78,19 @@ confirmação, cancelamento e exclusão de usuários com e sem treinos. Ele remo
 os registros que criou e não utiliza a conexão normal do aplicativo. A confirmação
 e o cancelamento na janela gráfica devem ser conferidos no Windows.
 
+## Validação de idade e duração na interface
+
+Os dois campos validam o texto digitado antes de salvar. Valores como `1,5`,
+`1.5`, zero, negativos, texto vazio e números maiores que `2147483647` são
+rejeitados com uma mensagem, sem arredondamento ou conversão automática.
+
+Para executar os testes do validador, sem precisar de MySQL ou Windows:
+
+```powershell
+dotnet run --project .\tests\ControleTreinos.Validacoes\ControleTreinos.Validacoes.csproj
+```
+
+No Windows, confira também os campos Idade e Duração ao cadastrar, editar e
+corrigir uma entrada inválida. Uma duração inteira válida deve ser mantida ao
+abrir e salvar a edição de um treino.
+

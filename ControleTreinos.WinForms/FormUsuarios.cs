@@ -13,7 +13,7 @@ public class FormUsuarios : Form
         new UsuarioRepositorio();
 
     private readonly TextBox campoNome = new TextBox();
-    private readonly NumericUpDown campoIdade = new NumericUpDown();
+    private readonly TextBox campoIdade = new TextBox();
 
     private readonly Button botaoCadastrar = new Button();
     private readonly Button botaoAtualizar = new Button();
@@ -37,9 +37,7 @@ public class FormUsuarios : Form
 
         campoNome.MaxLength = 100;
         campoNome.PlaceholderText = "Nome completo";
-        campoIdade.Minimum = 1;
-        campoIdade.Maximum = int.MaxValue;
-        campoIdade.Value = 1;
+        campoIdade.Text = "1";
         Componentes.Botao(botaoCadastrar, "Cadastrar usuário");
         Componentes.Botao(botaoAtualizar, "Atualizar lista");
         Componentes.Botao(botaoExcluir, "Excluir selecionado");
@@ -268,13 +266,27 @@ public class FormUsuarios : Form
             return;
         }
 
+        if (!ValidacaoNumerica.TentarLerInteiroPositivo(campoIdade.Text, out int idade))
+        {
+            MessageBox.Show(
+                this,
+                "A idade deve ser um número inteiro maior que zero, sem casas decimais.",
+                "Dados inválidos",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning
+            );
+            campoIdade.Focus();
+            campoIdade.SelectAll();
+            return;
+        }
+
         Usuario usuario;
 
         try
         {
             usuario = new Usuario(
                 campoNome.Text.Trim(),
-                (int)campoIdade.Value
+                idade
             );
         }
         catch (ArgumentException erro)
@@ -307,7 +319,7 @@ public class FormUsuarios : Form
             }
 
             campoNome.Clear();
-            campoIdade.Value = 1;
+            campoIdade.Text = "1";
 
             MessageBox.Show(
                 this,
